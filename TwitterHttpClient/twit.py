@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # In[ ]:
-
+!pip install bs4
 import socket
 import sys
 import requests
