@@ -15,7 +15,7 @@ ssc = StreamingContext(sc, 2)
 # setting a checkpoint to allow RDD recovery
 ssc.checkpoint("checkpoint_TwitterApp")
 # read data from port 9009
-dataStream = ssc.socketTextStream("localhost",2185)
+dataStream = ssc.socketTextStream("localhost", 2185)
 
 
 def aggregate_tags_count(new_values, total_sum):
@@ -27,16 +27,6 @@ def get_sql_context_instance(spark_context):
         globals()['sqlContextSingletonInstance'] = SQLContext(spark_context)
     return globals()['sqlContextSingletonInstance']
 
-
-def send_df_to_dashboard(df):
-    # extract the hashtags from dataframe and convert them into array
-    top_tags = [str(t.hashtag) for t in df.select("hashtag").collect()]
-    # extract the counts from dataframe and convert them into array
-    tags_count = [p.hashtag_count for p in df.select("hashtag_count").collect()]
-    # initialize and send the data through REST API
-    url = 'http://localhost:5001/updateData'
-    request_data = {'label': str(top_tags), 'data': str(tags_count)}
-    response = requests.post(url, data=request_data)
 
 
 def process_rdd(time, rdd):
@@ -53,8 +43,6 @@ def process_rdd(time, rdd):
         # get the top 10 hashtags from the table using SQL and print them
         hashtag_counts_df = sql_context.sql("select hashtag, hashtag_count from hashtags order by hashtag_count desc limit 10")
         hashtag_counts_df.show()
-        # call this method to prepare top 10 hashtags DF and send them
-        send_df_to_dashboard(hashtag_counts_df)
     except:
         e = sys.exc_info()[0]
         print("Error: %s" % e)
