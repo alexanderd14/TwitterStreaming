@@ -51,9 +51,9 @@ def process_rdd(time, rdd):
 words = dataStream.flatMap(lambda line: line.split(" "))
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
 #hashtags = words.map(lambda x: (x, 1))
-hashtags = words.filter(lambda w: '' in w).map(lambda x: (x, 1))
+hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
 # adding the count of each hashtag to its last count
-tags_totals = words.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
+tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
 tags_totals.pprint()
 # do processing for each RDD generated in each interval
 tags_totals.foreachRDD(process_rdd)
