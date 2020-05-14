@@ -15,7 +15,7 @@ ssc = StreamingContext(sc, 2)
 # setting a checkpoint to allow RDD recovery
 ssc.checkpoint("checkpoint_TwitterApp")
 # read data from port 9009
-dataStream = ssc.socketTextStream("localhost",9009)
+dataStream = ssc.socketTextStream("localhost",2185)
 
 
 def aggregate_tags_count(new_values, total_sum):
