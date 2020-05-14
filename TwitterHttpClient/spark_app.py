@@ -65,7 +65,8 @@ words = dataStream.flatMap(lambda line: line.split(" "))
 #hashtags = words.map(lambda x: (x, 1))
 hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
 # adding the count of each hashtag to its last count
-tags_totals = hashtags.updateStateByKey(aggregate_tags_count)
+tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
+tags_totals.pprint()
 # do processing for each RDD generated in each interval
 tags_totals.foreachRDD(process_rdd)
 
