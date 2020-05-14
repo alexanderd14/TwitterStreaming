@@ -6,15 +6,15 @@ import requests
 
 # create spark configuration
 conf = SparkConf()
-conf.setAppName("TwitterStreamApp")
+conf.setAppName("SFTwitter")
 # create spark instance with the above configuration
 sc = SparkContext(conf=conf)
 sc.setLogLevel("ERROR")
 # creat the Streaming Context from the above spark context with window size 2 seconds
 ssc = StreamingContext(sc, 2)
 # setting a checkpoint to allow RDD recovery
-ssc.checkpoint("checkpoint_TwitterApp")
-# read data from port 9009
+ssc.checkpoint("checkpoint")
+# read data from port 2185
 dataStream = ssc.socketTextStream("localhost", 2185)
 
 
@@ -51,7 +51,7 @@ def process_rdd(time, rdd):
 words = dataStream.flatMap(lambda line: line.split(" "))
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
 #hashtags = words.map(lambda x: (x, 1))
-hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
+hashtags = words.filter(lambda w: '' in w).map(lambda x: (x, 1))
 # adding the count of each hashtag to its last count
 tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
 tags_totals.pprint()
