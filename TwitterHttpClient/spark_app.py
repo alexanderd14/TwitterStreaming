@@ -38,8 +38,6 @@ def process_rdd(time, rdd):
         row_rdd = rdd.map(lambda w: Row(hashtag=w[0].encode("utf-8"), hashtag_count=w[1]))
         # create a DF from the Row RDD
         hashtags_df = sql_context.createDataFrame(row_rdd)
-        # Register the dataframe as table
-        hashtags_df.registerTempTable("hashtags")
         # get the top 10 hashtags from the table using SQL and print them
         hashtag_counts_df = sql_context.sql("select hashtag, hashtag_count from hashtags order by hashtag_count desc limit 10")
         hashtag_counts_df.show()
@@ -50,11 +48,9 @@ def process_rdd(time, rdd):
 # split each tweet into words
 words = dataStream.flatMap(lambda line: line.split(" "))
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
-#hashtags = words.map(lambda x: (x, 1))
 hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
 # adding the count of each hashtag to its last count
 tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
-tags_totals.pprint()
 # do processing for each RDD generated in each interval
 tags_totals.foreachRDD(process_rdd)
 
