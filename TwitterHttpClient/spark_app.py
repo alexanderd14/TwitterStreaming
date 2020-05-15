@@ -3,7 +3,7 @@ from pyspark.streaming import StreamingContext
 from pyspark.sql import Row,SQLContext
 import sys
 import requests
-stop= ['i',
+stopwords= ['i', 'I', 'RT', '&amp;', '', 'The',
  'me',
  'my',
  'myself',
@@ -233,7 +233,7 @@ def process_rdd(time, rdd):
 # split each tweet into words
 words = dataStream.flatMap(lambda line: line.split(" "))
 
-wordsclean = words.filter(lambda x: x not in stop)
+wordsclean = words.filter(lambda x: x not in stopwords)
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
 hashtags = wordsclean.filter(lambda w: '' in w).map(lambda x: (x, 1))
 
