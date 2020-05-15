@@ -3,7 +3,7 @@ from pyspark.streaming import StreamingContext
 from pyspark.sql import Row,SQLContext
 import sys
 import requests
-!pip install nltk
+pip install nltk
 import nltk
 from nltk.corpus import stopwords
 set(stopwords.words('english'))
