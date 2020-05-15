@@ -3,6 +3,10 @@ from pyspark.streaming import StreamingContext
 from pyspark.sql import Row,SQLContext
 import sys
 import requests
+import nltk
+from nltk.corpus import stopwords
+set(stopwords.words('english'))
+stop=stopwords.words('english')
 
 # create spark configuration
 conf = SparkConf()
@@ -54,8 +58,9 @@ def process_rdd(time, rdd):
 # split each tweet into words
 words = dataStream.flatMap(lambda line: line.split(" "))
 
+wordsclean = words.filter(lambda x: x not in stop)
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
-hashtags = words.filter(lambda w: '' in w).map(lambda x: (x, 1))
+hashtags = wordsclean.filter(lambda w: '' in w).map(lambda x: (x, 1))
 
 # adding the count of each hashtag to its last count using updateStateByKey
 tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
