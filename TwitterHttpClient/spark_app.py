@@ -35,16 +35,15 @@ def process_rdd(time, rdd):
         # Get spark sql singleton context from the current context
         sql_context = get_sql_context_instance(rdd.context)
         # convert the RDD to Row RDD
-        row_rdd = rdd.map(lambda w: Row(hashtag=w[0], hashtag_count=w[1]))
+        row_rdd = rdd.map(lambda w: Row(word=w[0], word_count=w[1]))
         # create a DF from the Row RDD
         hashtags_df = sql_context.createDataFrame(row_rdd)
         # Register the dataframe as table
         hashtags_df.registerTempTable("hashtags")
         # get the top 10 hashtags from the table using SQL and print them
-        hashtag_counts_df = sql_context.sql("select hashtag, hashtag_count from hashtags order by hashtag_count desc limit 10")
+        hashtag_counts_df = sql_context.sql("select word, word_count from hashtags order by word_count desc limit 10")
         hashtag_counts_df.show()
-        # call this method to prepare top 10 hashtags DF and send them
-        send_df_to_dashboard(hashtag_counts_df)
+        
         
     except:
         e = sys.exc_info()[0]
@@ -56,7 +55,7 @@ def process_rdd(time, rdd):
 words = dataStream.flatMap(lambda line: line.split(" "))
 
 # filter the words to get only hashtags, then map each hashtag to be a pair of (hashtag,1)
-hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
+hashtags = words.filter(lambda w: '' in w).map(lambda x: (x, 1))
 
 # adding the count of each hashtag to its last count using updateStateByKey
 tags_totals = hashtags.reduceByKeyAndWindow(lambda x, y: int(x) + int(y), lambda x, y: int(x) - int(y), 600, 30)
